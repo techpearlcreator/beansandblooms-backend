@@ -5,18 +5,15 @@ const cors = require('cors');
 const { Pool } = require('pg');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Render will set PORT automatically
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// PostgreSQL connection
+// PostgreSQL connection using Render's DATABASE_URL
 const pool = new Pool({
-    user: 'postgres',            // your DB user
-    host: 'localhost',           // DB host
-    database: 'fullstack-db',   // your DB name
-    password: 'techpearl',   // your DB password
-    port: 5432,
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // Required for Render PostgreSQL
 });
 
 // API endpoint to save orders
@@ -32,7 +29,7 @@ app.post('/api/orders', async (req, res) => {
         await pool.query(query, [
             customerName,
             address,
-            JSON.stringify(orderItems), // store as JSON string
+            JSON.stringify(orderItems),
             orderTotal,
             orderNumber,
             orderTime,
@@ -47,5 +44,5 @@ app.post('/api/orders', async (req, res) => {
 
 // Start server
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server running on port ${port}`);
 });
